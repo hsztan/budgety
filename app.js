@@ -25,6 +25,29 @@ var budgetController = (function () {
     }
   };
   
+  return {
+    addItem: function(type, des, val) {
+      var newItem, ID;
+      if (data.allItems[type].length === 0) {
+        ID = data.allItems[type].id = 0;
+      } else {
+        ID = data.allItems[type][data.allItems[type].length - 1].id + 1
+      }
+
+      if (type === 'exp') {
+        newItem = new Expense(ID, des, val);
+      } else if (type === 'inc') {
+        newItem = new Income(ID, des, val);
+      }
+
+      data.allItems[type].push(newItem);
+      
+      return newItem;
+    },
+    testing: function() {
+      console.log(data);
+    }
+  };
 
 })();
 
@@ -57,9 +80,7 @@ var controller = (function(budgetCtrl, UICtrl) {
 
   var setupEventListeners = function () {
     var DOM = UICtrl.getDOMstrings();
-
     document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
-
     document.addEventListener('keypress', function (event) {
       if (event.keyCode === 13 || event.which === 13) {
         ctrlAddItem();
@@ -72,6 +93,9 @@ var controller = (function(budgetCtrl, UICtrl) {
     var input = UICtrl.getinput();
 
     // 2. Add item to budget controller.
+    var newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+
+    // 3. Add item to the UI
   };
 
  return {
