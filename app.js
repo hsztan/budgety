@@ -55,8 +55,8 @@ var budgetController = (function () {
 var UIController = (function() {
   var DOMstrings = {
     inputType: '.add__type',
-    descriptionType: '.add__description',
-    valueType: '.add__value',
+    inputDescription: '.add__description',
+    inputValue: '.add__value',
     inputBtn: '.add__btn',
     incomeContainer: '.income__list',
     expenseContainer: '.expenses__list'
@@ -66,10 +66,11 @@ var UIController = (function() {
     getinput: function() {
       return {
         type: document.querySelector(DOMstrings.inputType).value,
-        description: document.querySelector(DOMstrings.descriptionType).value,
-        value: document.querySelector(DOMstrings.valueType).value
+        description: document.querySelector(DOMstrings.inputDescription).value,
+        value: document.querySelector(DOMstrings.inputValue).value
       }
     },
+
     addListItem: function(obj, type) {
       var html, newHtml, element;
       // Create HTML string with placeholder text
@@ -91,6 +92,16 @@ var UIController = (function() {
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
 
     },
+
+    clearFields: function() {
+      var fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+      //var fieldsArr = Array.prototype.slice.call(fields);
+      fields.forEach(function(e) {
+        e.value = '';
+      })
+      fields[0].focus();
+    },
+
     getDOMstrings: function() {
       return DOMstrings;
     }
@@ -120,6 +131,13 @@ var controller = (function(budgetCtrl, UICtrl) {
 
     // 3. Add item to the UI
     UICtrl.addListItem(newItem, input.type);
+
+    // 4. Clear the fields
+    UICtrl.clearFields();
+
+    // 5. Calculate the budget
+
+    // 6. Display the budget on the UI
   };
 
  return {
