@@ -97,6 +97,9 @@ var budgetController = (function () {
 
 })();
 
+
+
+
 // UI CONTROLLER
 var UIController = (function() {
   var DOMstrings = {
@@ -175,6 +178,9 @@ var UIController = (function() {
   
 })();
 
+
+
+
 // GLOBAL APP CONTROLLER
 var controller = (function(budgetCtrl, UICtrl) {
 
@@ -198,6 +204,14 @@ var controller = (function(budgetCtrl, UICtrl) {
 
     // 6. Display the budget on the UI
     UICtrl.displayBudget(budget);
+  };
+
+  var updatePercentages = function() {
+    // Calculate percentages
+
+    // Read percentages from Budget Controller
+
+    // Update the user interface
   };
 
   var ctrlAddItem = function() {
