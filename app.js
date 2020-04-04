@@ -6,6 +6,19 @@ var budgetController = (function () {
     this.id = id;
     this.description = description;
     this.value = value;
+    this.percentage = -1;
+  };
+
+  Expense.prototype.calcPercentage = function(totalIncome) {
+    if (totalIncome > 0) {
+      this.percentage = Math.round((this.value / totalIncome) * 100);
+    } else {
+      this.percentage = -1;
+    }
+  };
+
+  Expense.prototype.getPercentage = function() {
+    return this.percentage;
   };
 
   var Income = function(id, description, value) {
@@ -79,9 +92,22 @@ var budgetController = (function () {
       } else {
         data.percentage = -1;
       }
-      
-
     },
+
+    calculatePercentages: function() {
+      data.allItems.exp.forEach(function(e) {
+        e.calcPercentage(data.totals.inc);
+      });
+    },
+
+    getPercentages: function() {
+      var allPercentages = data.allItems.exp.map(function(e) {
+        return e.percentage;
+        //return e.getPercentage();
+      });
+      return allPercentages;
+    },
+
     getBudget: function() {
       return {
         budget: data.budget,
@@ -113,7 +139,21 @@ var UIController = (function() {
     incomeLabel: '.budget__income--value',
     expensesLabel: '.budget__expenses--value',
     percentageLabel: '.budget__expenses--percentage',
-    container: '.container'
+    container: '.container',
+    expensesPercentage: '.item__percentage'
+  };
+
+  var formatNumber = function(num, type) {
+    var numSplit, int, dec;
+    num = Math.abs(num);
+    num = num.toFixed(2);
+    numSplit = num.split('.');
+    int = numSplit[0];
+    dec = numSplit[1];
+    if (int.length > 3) {
+      int = int.substring(0, int.length - 3) + ',' + int.substring(int.length - 3, 4);
+    }
+    return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
   };
 
   return {
@@ -139,7 +179,7 @@ var UIController = (function() {
       // Replace the placeholder text with some actual data
       newHtml = html.replace('%id%', obj.id);
       newHtml = newHtml.replace('%description%', obj.description);
-      newHtml = newHtml.replace('%value%', obj.value);
+      newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
 
       // Insert the HTML into the DOM
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
@@ -165,10 +205,21 @@ var UIController = (function() {
       document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
       document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
       if (obj.percentage > 0) {
-        document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage;
+        document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage + '%';
       } else {
         document.querySelector(DOMstrings.percentageLabel).textContent = '---';
       }
+    },
+
+    displayPercentages: function(percentages) {
+      var fields = document.querySelectorAll(DOMstrings.expensesPercentage);
+      fields.forEach(function(e, i) {
+        if (percentages[i] > 0) {
+          e.textContent = percentages[i] + '%';
+        } else {
+          e.textContent = '---';
+        }
+      });
     },
 
     getDOMstrings: function() {
@@ -208,10 +259,13 @@ var controller = (function(budgetCtrl, UICtrl) {
 
   var updatePercentages = function() {
     // Calculate percentages
-
+    budgetCtrl.calculatePercentages();
+    
     // Read percentages from Budget Controller
+    var percentages = budgetCtrl.getPercentages();
 
     // Update the user interface
+    UICtrl.displayPercentages(percentages);
   };
 
   var ctrlAddItem = function() {
@@ -230,6 +284,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 
       // 5. Update the budget and update the UI
       updateBudget();
+
+      // 6. Calculate and update percentages
+      updatePercentages();
     }
   };
 
@@ -250,6 +307,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 
       // 3. Update and show the new budget.
       updateBudget();
+
+      // 4. Calculate and update percentages
+      updatePercentages();
     }
   };
 
